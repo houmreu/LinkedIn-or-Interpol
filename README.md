@@ -27,7 +27,7 @@ A simple React.js web game where you try to guess if the person in the photo is 
 ## Disclaimer
 
 ⚠️ For legal reasons, photos labeled as "LinkedIn" are **not real LinkedIn photos**.  
-They are randomly generated and do not depict real people.
+They are randomly generated and do not depict real people. ⚠️
 
 ## License
 
