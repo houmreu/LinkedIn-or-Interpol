@@ -113,7 +113,6 @@ function App() {
 
   useEffect(() => {
     if(person == null) loadNextImage();
-    console.log("new page");
     console.log("⚠️ Disclaimer: For legal reasons, the photos labeled as “LinkedIn” are not taken from LinkedIn. They are randomly generated and do not depict real people. ⚠️");
   }, [])
 
