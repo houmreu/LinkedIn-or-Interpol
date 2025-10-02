@@ -116,7 +116,7 @@ function App() {
     console.log("⚠️ Disclaimer: For legal reasons, the photos labeled as “LinkedIn” are not taken from LinkedIn. They are randomly generated and do not depict real people. ⚠️");
   }, [])
 
-  const truncateText = (text, maxLength = 66) => {
+  const truncateText = (text, maxLength = 65) => {
     if (!text) return "";
     return text.length > maxLength ? text.slice(0, maxLength - 3) + "..." : text;
   };
