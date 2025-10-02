@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/LinkedIn-or-Interpol/static/css/main.55663618.css",
-    "main.js": "/LinkedIn-or-Interpol/static/js/main.9581c05c.js",
+    "main.js": "/LinkedIn-or-Interpol/static/js/main.0e0866f5.js",
     "static/js/453.90ad94ef.chunk.js": "/LinkedIn-or-Interpol/static/js/453.90ad94ef.chunk.js",
     "index.html": "/LinkedIn-or-Interpol/index.html",
     "main.55663618.css.map": "/LinkedIn-or-Interpol/static/css/main.55663618.css.map",
-    "main.9581c05c.js.map": "/LinkedIn-or-Interpol/static/js/main.9581c05c.js.map",
+    "main.0e0866f5.js.map": "/LinkedIn-or-Interpol/static/js/main.0e0866f5.js.map",
     "453.90ad94ef.chunk.js.map": "/LinkedIn-or-Interpol/static/js/453.90ad94ef.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.55663618.css",
-    "static/js/main.9581c05c.js"
+    "static/js/main.0e0866f5.js"
   ]
 }
