@@ -9,7 +9,6 @@ function App() {
   const [currentSource, setCurrentSource] = useState("interpol");
   const [bgColor, setBgColor] = useState(""); 
 
-  const [person, setPerson] = useState(null);
   const [image, setImage] = useState(null);
   const [personName, setPersonName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
@@ -18,10 +17,55 @@ function App() {
   const [job, setJob] = useState("");
   const [profileLink, setProfileLink] = useState("");
 
+  const [nextPerson, setNextPerson] = useState(null);
+
   const codeToFlag = (code) =>
     code.toUpperCase().replace(/./g, char =>
       String.fromCodePoint(127397 + char.charCodeAt())
   );
+
+  const loadNextImage = async () => {
+    setIsGuessing(true);
+    setBgColor("");
+
+    if (nextPerson) {
+      applyPerson(nextPerson.data, nextPerson.source);
+      setNextPerson(null);
+    } else {
+      await prepareNextPerson();
+      if (nextPerson) {
+        applyPerson(nextPerson.data, nextPerson.source);
+        setNextPerson(null);
+      }
+    }
+    prepareNextPerson();
+  };
+
+  const applyPerson = (data, source) => {
+    setImage(data.image);
+    setPersonName(data.name);
+    setDateOfBirth(data.dateOfBirth);
+    setNationality(data.nationality);
+    setCurrentSource(source);
+
+    if (source === "interpol") {
+      setProfileLink(data.profileLink);
+      setCharge(data.charge);
+    } else {
+      setJob(data.job);
+    }
+  };
+
+  const prepareNextPerson = async () => {
+    const randomSource = Math.random() < 0.5 ? "interpol" : "linkedin";
+    let data;
+    if (randomSource === "interpol") {
+      data = await generateInterpol();
+    } else {
+      data = await generateLinkedIn();
+    }
+    setNextPerson({ data, source: randomSource });
+  };
 
   const guess = (guess) => {
     if (guess === currentSource) {
@@ -36,16 +80,6 @@ function App() {
     setIsGuessing(false);
   };
 
-  const loadNextImage = () => {
-    const randomSource = Math.random() < 0.5 ? "interpol" : "linkedin";
-    setCurrentSource(randomSource);
-    setIsGuessing(true);
-    setBgColor("");
-
-    if(randomSource === "interpol") generateInterpol();
-    else if (randomSource === "linkedin") generateLinkedIn();
-  }
-
   const generateInterpol = async () => {
     try{
       const res = await fetch("https://ws-public.interpol.int/notices/v1/red?resultPerPage=160&page=" + (Math.floor(Math.random() * 35) + 1));
@@ -53,17 +87,17 @@ function App() {
 
       const randomPerson = data._embedded.notices[Math.floor(Math.random() * data._embedded.notices.length)];
       const imageData = await (await fetch(randomPerson._links.images.href)).json();
-      setImage(imageData._embedded.images[0]._links.self.href);
-      setPersonName(`${randomPerson.forename} ${randomPerson.name}`);
-      setDateOfBirth(randomPerson.date_of_birth);
-      setNationality(randomPerson.nationalities[0]);
-      setPerson(randomPerson);
-      setProfileLink(`https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices#${randomPerson.entity_id.replace('/', '-')}`
-);
-
       const detailsRes = await fetch(randomPerson._links.self.href);
       const details = await detailsRes.json();
-      setCharge(truncateText(details.arrest_warrants?.[0]?.charge || "No charge info"));
+      
+      return {
+        image: imageData._embedded.images[0]._links.self.href,
+        name: `${randomPerson.forename} ${randomPerson.name}`,
+        dateOfBirth: randomPerson.date_of_birth,
+        nationality: randomPerson.nationalities[0],
+        profileLink: `https://www.interpol.int/How-we-work/Notices/Red-Notices/View-Red-Notices#${randomPerson.entity_id.replace('/', '-')}`,
+        charge: truncateText(details.arrest_warrants?.[0]?.charge || "No charge info")
+      };
     }
     catch(err){
       console.log("Error while loading Interpol: ", err);
@@ -82,19 +116,6 @@ function App() {
       ? `https://xsgames.co/randomusers/avatar.php?g=${gender}&r=${Math.random()}`
       : user.picture.large;
 
-      const randomPerson = {
-        firstName: user.name.first,
-        lastName: user.name.last,
-        date_of_birth: user.dob.date.split("T")[0].replace(/-/g, '/'),
-        nationality: user.nat,
-        image: imageUrl
-      };
-      setImage(randomPerson.image);
-      setPersonName(`${randomPerson.firstName} ${randomPerson.lastName}`);
-      setDateOfBirth(randomPerson.date_of_birth);
-      setNationality(randomPerson.nationality);
-      setPerson(randomPerson);
-
       const jobs = [
         "Software Engineer","Web Developer","UX/UI Designer","Doctor","Teacher","Lawyer","Chef","Photographer",
         "Scientist","Data Analyst","Marketing Specialist","Project Manager","Business Analyst","Product Manager",
@@ -104,7 +125,14 @@ function App() {
         "Cybersecurity Analyst","Game Developer","Biologist","Chemist","Mathematician","Statistician",
         "Human Resources Manager","Recruiter","Psychologist","Therapist","Police Officer","Firefighter","Paramedic"
       ];
-      setJob(jobs[Math.floor(Math.random() * jobs.length)]);
+
+      return {
+        image: imageUrl,
+        name: `${user.name.first} ${user.name.last}`,
+        dateOfBirth: user.dob.date.split("T")[0].replace(/-/g, '/'),
+        nationality: user.nat,
+        job: jobs[Math.floor(Math.random() * jobs.length)]
+      };
     } 
     catch (err) {
       console.log("Error fetching random person: ", err);
@@ -112,9 +140,9 @@ function App() {
   }
 
   useEffect(() => {
-    if(person == null) loadNextImage();
+    
     console.log("⚠️ Disclaimer: For legal reasons, the photos labeled as “LinkedIn” are not taken from LinkedIn. They are randomly generated and do not depict real people. ⚠️");
-  }, [])
+  }, []);
 
   const truncateText = (text, maxLength = 66) => {
     if (!text) return "";
